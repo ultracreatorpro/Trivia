@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-image: url('https://i.ibb.co/QmF44B8/La-Neurona-intranquila-20240909-153856-0000.png'); /* URL del fondo que puedes cambiar */
+            background-image: url('https://i.ibb.co/R2Vdxzj/La-Neurona-intranquila-20240909-180739-0000.png'); /* URL del fondo que puedes cambiar */
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -77,6 +77,8 @@
         <div class="timer" id="timer">Tiempo: 30s</div>
         <div class="question" id="question">Pregunta aquí...</div>
         <div class="answers" id="answers"></div>
+        <div class="score" id="score">Puntos: 0</div>
+        <div class="record" id="record">Récord: 0</div>
     </div>
 
     <div class="popup" id="popup">¡Respuesta!</div>
@@ -238,6 +240,8 @@
     let timeLeft = 30;
     let timer;
     let shuffledQuestions = [];
+    let score = 0;
+    let record = localStorage.getItem("triviaRecord") || 0;
 
     const timerElement = document.getElementById("timer");
     const questionElement = document.getElementById("question");
@@ -245,14 +249,20 @@
     const popup = document.getElementById("popup");
     const correctSound = document.getElementById("correctSound");
     const wrongSound = document.getElementById("wrongSound");
+    const scoreElement = document.getElementById("score");
+    const recordElement = document.getElementById("record");
+
+    recordElement.textContent = `Récord: ${record}`;
 
     function shuffleQuestions() {
         shuffledQuestions = [...questions].sort(() => Math.random() - 0.5);
     }
 
     function startGame() {
-        shuffleQuestions(); // Aleatorizar las preguntas
+        shuffleQuestions();
         currentQuestion = 0;
+        score = 0;
+        scoreElement.textContent = `Puntos: ${score}`;
         loadQuestion();
     }
 
@@ -268,11 +278,11 @@
     }
 
     function loadQuestion() {
-        timeLeft = 30; // Reiniciar el temporizador con cada pregunta
+        timeLeft = 30; 
         timerElement.textContent = `Tiempo: ${timeLeft}s`;
 
-        clearInterval(timer); // Limpiar el temporizador anterior
-        timer = setInterval(updateTimer, 1000); // Reiniciar el temporizador
+        clearInterval(timer);
+        timer = setInterval(updateTimer, 1000);
 
         const questionData = shuffledQuestions[currentQuestion];
         questionElement.textContent = questionData.question;
@@ -293,6 +303,9 @@
         if (selectedIndex === correctIndex) {
             correctSound.play();
             showPopup("¡Correcto!");
+            score += 3;
+            scoreElement.textContent = `Puntos: ${score}`;
+            updateRecord();
         } else {
             wrongSound.play();
             showPopup("¡Incorrecto!");
@@ -310,6 +323,14 @@
         } else {
             showPopup("¡Has completado la trivia!");
             resetGame();
+        }
+    }
+
+    function updateRecord() {
+        if (score > record) {
+            record = score;
+            localStorage.setItem("triviaRecord", record);
+            recordElement.textContent = `Récord: ${record}`;
         }
     }
 
@@ -331,7 +352,6 @@
     }
 
     startGame();
-</script>
-
+    </script>
 </body>
 </html>
