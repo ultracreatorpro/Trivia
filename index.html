@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de Trivia</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('https://i.ibb.co/QmF44B8/La-Neurona-intranquila-20240909-153856-0000.png'); /* URL del fondo que puedes cambiar */
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+        }
+        .timer {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+        .question {
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+        .answers {
+            display: flex;
+            flex-direction: column;
+        }
+        .answer {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .answer:hover {
+            background-color: #0056b3;
+        }
+        .popup {
+            display: none;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 15px;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 10px;
+            font-size: 18px;
+            z-index: 1000;
+        }
+        .popup.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Trivia de Cultura General</h1>
+        <div class="timer" id="timer">Tiempo: 30s</div>
+        <div class="question" id="question">Pregunta aquí...</div>
+        <div class="answers" id="answers"></div>
+    </div>
+
+    <div class="popup" id="popup">¡Respuesta!</div>
+
+    <audio id="correctSound" src="https://www.soundjay.com/button/beep-07.wav"></audio>
+    <audio id="wrongSound" src="https://www.soundjay.com/button/beep-10.wav"></audio>
+
+    <script>
+    const questions = [
+        {
+            question: "¿Cuál es el planeta más grande del sistema solar?",
+            answers: ["Tierra", "Marte", "Júpiter", "Saturno"],
+            correct: 2
+        },
+        {
+            question: "¿Cuál es el idioma más hablado en el mundo?",
+            answers: ["Inglés", "Chino mandarín", "Español", "Árabe"],
+            correct: 1
+        },
+        {
+            question: "¿En qué año llegó el hombre a la Luna?",
+            answers: ["1965", "1969", "1972", "1975"],
+            correct: 1
+        },
+        {
+            question: "¿Quién pintó la Mona Lisa?",
+            answers: ["Vincent van Gogh", "Pablo Picasso", "Leonardo da Vinci", "Claude Monet"],
+            correct: 2
+        },
+        {
+    question: "¿Quién fue el primer presidente de los Estados Unidos?",
+    answers: ["Thomas Jefferson", "George Washington", "Abraham Lincoln", "John Adams"],
+    correct: 1
+},
+{
+    question: "¿Qué tipo de animal es una ballena?",
+    answers: ["Pez", "Mamífero", "Reptil", "Ave"],
+    correct: 1
+},
+{
+    question: "¿Cuál es el río más largo de Europa?",
+    answers: ["Rin", "Danubio", "Volga", "Loira"],
+    correct: 2
+},
+{
+    question: "¿Cuál es la moneda oficial de Japón?",
+    answers: ["Yuan", "Won", "Yen", "Dólar"],
+    correct: 2
+},
+{
+    question: "¿Qué país ganó la Copa Mundial de Fútbol 2018?",
+    answers: ["Francia", "Croacia", "Alemania", "Brasil"],
+    correct: 0
+},
+{
+    question: "¿Qué famoso científico desarrolló la teoría de la relatividad?",
+    answers: ["Isaac Newton", "Niels Bohr", "Albert Einstein", "Galileo Galilei"],
+    correct: 2
+},
+{
+    question: "¿Qué es la fotosíntesis?",
+    answers: ["La conversión de alimentos en energía", "La reproducción celular", "La producción de oxígeno a partir de dióxido de carbono", "La eliminación de desechos"],
+    correct: 2
+},
+{
+    question: "¿Cuál es el principal ingrediente del guacamole?",
+    answers: ["Tomate", "Aguacate", "Cebolla", "Pimiento"],
+    correct: 1
+},
+{
+    question: "¿Qué país es conocido como la cuna de la democracia?",
+    answers: ["Roma", "Francia", "Grecia", "Inglaterra"],
+    correct: 2
+},
+{
+    question: "¿Cuál es el océano más pequeño del mundo?",
+    answers: ["Ártico", "Atlántico", "Índico", "Pacífico"],
+    correct: 0
+},
+{
+    question: "¿En qué país se encuentra el Machu Picchu?",
+    answers: ["Perú", "Bolivia", "Chile", "Ecuador"],
+    correct: 0
+},
+{
+    question: "¿Cuál es la capital de Canadá?",
+    answers: ["Toronto", "Vancouver", "Montreal", "Ottawa"],
+    correct: 3
+},
+{
+    question: "¿Qué tipo de estrella es el Sol?",
+    answers: ["Enana blanca", "Gigante roja", "Enana amarilla", "Supergigante"],
+    correct: 2
+},
+{
+    question: "¿Qué famoso director dirigió 'Jurassic Park'?",
+    answers: ["Steven Spielberg", "George Lucas", "James Cameron", "Ridley Scott"],
+    correct: 0
+},
+{
+    question: "¿Cuál es el nombre del río que cruza Egipto?",
+    answers: ["Nilo", "Tigris", "Eufrates", "Jordán"],
+    correct: 0
+},
+{
+    question: "¿Qué elemento químico tiene el símbolo Au?",
+    answers: ["Plata", "Oro", "Cobre", "Hierro"],
+    correct: 1
+},
+{
+    question: "¿Cuál es el deporte más popular en el mundo?",
+    answers: ["Fútbol", "Baloncesto", "Tenis", "Golf"],
+    correct: 0
+},
+{
+    question: "¿En qué ciudad se encuentra la Torre Eiffel?",
+    answers: ["Londres", "Roma", "París", "Berlín"],
+    correct: 2
+},
+{
+    question: "¿Qué tipo de animal es el koala?",
+    answers: ["Reptil", "Mamífero", "Ave", "Pez"],
+    correct: 1
+},
+{
+    question: "¿Cuál es el país más pequeño del mundo?",
+    answers: ["Mónaco", "Ciudad del Vaticano", "San Marino", "Liechtenstein"],
+    correct: 1
+},
+{
+    question: "¿En qué continente se encuentra la Antártida?",
+    answers: ["África", "Asia", "América", "Antártida"],
+    correct: 3
+},
+{
+    question: "¿Cuál es el sistema operativo de código abierto más popular?",
+    answers: ["Windows", "macOS", "Linux", "Android"],
+    correct: 2
+},
+{
+    question: "¿Qué planeta es conocido como el Planeta Rojo?",
+    answers: ["Venus", "Marte", "Mercurio", "Júpiter"],
+    correct: 1
+},
+{
+    question: "¿Qué continente tiene la mayor cantidad de países?",
+    answers: ["África", "Asia", "Europa", "América"],
+    correct: 0
+},
+        // ... (más preguntas aquí)
+        {
+            question: "¿Qué tipo de planta es un cactus?",
+            answers: ["Suculenta", "Orquídea", "Pino", "Hiedra"],
+            correct: 0
+        }
+    ];
+
+    let currentQuestion = 0;
+    let timeLeft = 30;
+    let timer;
+    let shuffledQuestions = [];
+
+    const timerElement = document.getElementById("timer");
+    const questionElement = document.getElementById("question");
+    const answersElement = document.getElementById("answers");
+    const popup = document.getElementById("popup");
+    const correctSound = document.getElementById("correctSound");
+    const wrongSound = document.getElementById("wrongSound");
+
+    function shuffleQuestions() {
+        shuffledQuestions = [...questions].sort(() => Math.random() - 0.5);
+    }
+
+    function startGame() {
+        shuffleQuestions(); // Aleatorizar las preguntas
+        currentQuestion = 0;
+        loadQuestion();
+    }
+
+    function updateTimer() {
+        timeLeft--;
+        timerElement.textContent = `Tiempo: ${timeLeft}s`;
+
+        if (timeLeft === 0) {
+            clearInterval(timer);
+            showPopup("¡Tiempo agotado!");
+            nextQuestion();
+        }
+    }
+
+    function loadQuestion() {
+        timeLeft = 30; // Reiniciar el temporizador con cada pregunta
+        timerElement.textContent = `Tiempo: ${timeLeft}s`;
+
+        clearInterval(timer); // Limpiar el temporizador anterior
+        timer = setInterval(updateTimer, 1000); // Reiniciar el temporizador
+
+        const questionData = shuffledQuestions[currentQuestion];
+        questionElement.textContent = questionData.question;
+        answersElement.innerHTML = "";
+
+        questionData.answers.forEach((answer, index) => {
+            const button = document.createElement("button");
+            button.textContent = answer;
+            button.classList.add("answer");
+            button.addEventListener("click", () => checkAnswer(index));
+            answersElement.appendChild(button);
+        });
+    }
+
+    function checkAnswer(selectedIndex) {
+        const correctIndex = shuffledQuestions[currentQuestion].correct;
+
+        if (selectedIndex === correctIndex) {
+            correctSound.play();
+            showPopup("¡Correcto!");
+        } else {
+            wrongSound.play();
+            showPopup("¡Incorrecto!");
+        }
+
+        setTimeout(() => {
+            nextQuestion();
+        }, 1000);
+    }
+
+    function nextQuestion() {
+        currentQuestion++;
+        if (currentQuestion < shuffledQuestions.length) {
+            loadQuestion();
+        } else {
+            showPopup("¡Has completado la trivia!");
+            resetGame();
+        }
+    }
+
+    function showPopup(message) {
+        popup.textContent = message;
+        popup.classList.add("show");
+        setTimeout(() => {
+            popup.classList.remove("show");
+        }, 1500);
+    }
+
+    function resetGame() {
+        clearInterval(timer);
+        setTimeout(() => {
+            shuffleQuestions();
+            currentQuestion = 0;
+            startGame();
+        }, 2000);
+    }
+
+    startGame();
+</script>
+
+</body>
+</html>
